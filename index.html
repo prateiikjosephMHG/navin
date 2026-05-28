@@ -1,0 +1,627 @@
+bash
+
+cat > /mnt/user-data/outputs/index.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAVIN — Needs Analysis & Vertical Intelligence Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0a1628; --navy-mid: #152240; --navy-light: #1e3058;
+    --gold: #c9a84c; --gold-light: #e8c97a; --gold-dim: #7a5e28;
+    --cream: #f5f0e8; --cream-dark: #e8e0d0;
+    --white: #ffffff; --text-primary: #0a1628; --text-secondary: #4a5568; --text-muted: #8896a8;
+    --border: rgba(10,22,40,0.1); --border-strong: rgba(10,22,40,0.2);
+    --surface: #ffffff; --surface-2: #f8f6f2;
+    --success: #1a7a4a; --success-bg: #e8f5ee;
+    --warning-bg: #fef9ec; --warning: #b45309;
+    --info-bg: #eef4fd; --info: #1a56a0;
+    --radius: 12px; --radius-sm: 8px; --radius-lg: 18px;
+    --shadow: 0 4px 24px rgba(10,22,40,0.08);
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+
+  /* TOPBAR */
+  .topbar { background: var(--navy); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .logo-mark { width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--navy); }
+  .logo-text { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--white); letter-spacing: 0.06em; display: block; line-height: 1.1; }
+  .logo-expansion { font-size: 9.5px; color: var(--gold); letter-spacing: 0.07em; display: block; margin-top: 1px; font-weight: 500; }
+  .logo-expansion span { color: var(--gold-light); font-weight: 700; }
+  .nav-tabs { display: flex; gap: 4px; }
+  .nav-tab { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; color: rgba(255,255,255,0.6); background: transparent; border: none; transition: all 0.2s; display: flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; }
+  .nav-tab:hover { color: white; background: rgba(255,255,255,0.08); }
+  .nav-tab.active { color: var(--gold); background: rgba(201,168,76,0.12); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 2rem; max-width: 900px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  /* CHAT */
+  .chat-intro { background: var(--navy); border-radius: var(--radius-lg); padding: 2rem 2rem 1.5rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+  .chat-intro::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%); pointer-events: none; }
+  .chat-intro-eyebrow { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 6px; }
+  .chat-intro-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: white; margin-bottom: 6px; line-height: 1.2; }
+  .chat-intro-abbr { font-size: 11px; color: rgba(255,255,255,0.35); margin-bottom: 8px; letter-spacing: 0.03em; }
+  .chat-intro-abbr span { color: var(--gold); font-weight: 600; }
+  .chat-intro-sub { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+  .dept-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+  .dept-chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.12); transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .dept-chip:hover, .dept-chip.selected { background: rgba(201,168,76,0.2); color: var(--gold-light); border-color: rgba(201,168,76,0.4); }
+  .chat-window { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+  .chat-messages { padding: 1.5rem; min-height: 340px; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+  .msg { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .msg.agent .msg-avatar { background: var(--navy); color: var(--gold); font-family: 'DM Serif Display', serif; font-size: 11px; }
+  .msg.user .msg-avatar { background: var(--gold); color: var(--navy); }
+  .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.55; }
+  .msg.agent .msg-bubble { background: var(--surface-2); color: var(--text-primary); border-bottom-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--navy); color: white; border-bottom-right-radius: 4px; }
+  .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: blink 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; } .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:0.3} 40%{opacity:1} }
+  .chat-input-area { border-top: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; gap: 10px; align-items: flex-end; }
+  .chat-input { flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; resize: none; outline: none; color: var(--text-primary); background: var(--surface-2); min-height: 42px; max-height: 100px; transition: border-color 0.2s; line-height: 1.4; }
+  .chat-input:focus { border-color: var(--navy); background: white; }
+  .send-btn { width: 42px; height: 42px; background: var(--navy); border: none; border-radius: var(--radius-sm); color: var(--gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; transition: background 0.2s; }
+  .send-btn:hover { background: var(--navy-light); } .send-btn:disabled { background: var(--cream-dark); color: var(--text-muted); cursor: not-allowed; }
+  .quick-replies { padding: 0 1.5rem 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
+  .qr-btn { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--info-bg); color: var(--info); border: 1px solid rgba(26,86,160,0.15); transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .qr-btn:hover { background: var(--info); color: white; }
+  .submission-card { background: var(--success-bg); border: 1px solid rgba(26,122,74,0.2); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-top: 1rem; display: none; }
+  .submission-card.visible { display: flex; align-items: center; gap: 12px; }
+
+  /* DASHBOARD */
+  .dash-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.5rem; }
+  .dash-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); }
+  .dash-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .export-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--navy); color: var(--gold); border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .export-btn:hover { background: var(--navy-light); }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; box-shadow: var(--shadow); }
+  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 600; color: var(--navy); line-height: 1; margin-bottom: 4px; }
+  .kpi-delta { font-size: 12px; color: var(--success); font-weight: 500; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }
+  .panel-title { font-size: 13px; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; display: flex; align-items: center; gap: 7px; }
+  .cluster-list { display: flex; flex-direction: column; gap: 10px; }
+  .cluster-item { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; transition: all 0.2s; }
+  .cluster-item:hover { border-color: var(--gold); box-shadow: 0 2px 12px rgba(201,168,76,0.1); }
+  .cluster-item-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .cluster-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .cluster-count { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: var(--navy); color: var(--gold); }
+  .cluster-bar-wrap { height: 4px; background: var(--cream-dark); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+  .cluster-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .cluster-meta { font-size: 11px; color: var(--text-muted); }
+  .roi-list { display: flex; flex-direction: column; gap: 8px; }
+  .roi-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--surface-2); }
+  .roi-rank { width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: var(--gold); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .roi-name { font-size: 13px; font-weight: 500; flex: 1; color: var(--text-primary); }
+  .roi-score { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .roi-high { background: var(--success-bg); color: var(--success); } .roi-mid { background: var(--warning-bg); color: var(--warning); }
+  .submissions-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .submissions-table th { text-align: left; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .submissions-table td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-primary); }
+  .submissions-table tr:last-child td { border-bottom: none; } .submissions-table tr:hover td { background: var(--surface-2); }
+  .tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .tag-manual { background: #fef3c7; color: #92400e; } .tag-data { background: #ede9fe; color: #5b21b6; }
+  .tag-comm { background: #dbeafe; color: #1e40af; } .tag-process { background: #d1fae5; color: #065f46; } .tag-tech { background: #fee2e2; color: #991b1b; }
+  .impact-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+  .impact-high { background: #e53e3e; } .impact-mid { background: #dd6b20; } .impact-low { background: #38a169; }
+
+  /* SYNC BANNER */
+  .sync-status { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 12px; margin-bottom: 1.5rem; }
+  .sync-ok { background: var(--success-bg); border: 1px solid rgba(26,122,74,0.2); color: var(--success); }
+  .sync-warn { background: var(--info-bg); border: 1px solid rgba(26,86,160,0.15); color: var(--info); }
+
+  /* PRD */
+  .prd-select-area { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: var(--shadow); }
+  .prd-select-label { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+  .prd-item-list { display: flex; flex-direction: column; gap: 8px; }
+  .prd-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+  .prd-item:hover { border-color: var(--navy); } .prd-item.selected { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+  .prd-item-name { font-size: 13px; font-weight: 500; color: var(--text-primary); } .prd-item-dept { font-size: 12px; color: var(--text-muted); }
+  .gen-btn { width: 100%; margin-top: 12px; padding: 12px; background: var(--navy); color: var(--gold); border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+  .gen-btn:hover { background: var(--navy-light); } .gen-btn:disabled { background: var(--cream-dark); color: var(--text-muted); cursor: not-allowed; }
+  .prd-output { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); display: none; }
+  .prd-output.visible { display: block; }
+  .prd-output h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); margin-bottom: 4px; }
+  .prd-output .meta { font-size: 12px; color: var(--text-muted); margin-bottom: 1.5rem; display: flex; gap: 16px; flex-wrap: wrap; }
+  .prd-section-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; color: var(--gold-dim); margin: 1.25rem 0 6px; }
+  .prd-body { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+  .prd-body ul { padding-left: 1.25rem; margin-top: 4px; } .prd-body li { margin-bottom: 4px; }
+  .prd-actions { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+  .action-btn { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .action-primary { background: var(--navy); color: var(--gold); border: none; } .action-primary:hover { background: var(--navy-light); }
+  .action-secondary { background: white; color: var(--navy); border: 1px solid var(--border-strong); } .action-secondary:hover { background: var(--surface-2); }
+  .chat-messages::-webkit-scrollbar { width: 4px; } .chat-messages::-webkit-scrollbar-thumb { background: var(--cream-dark); border-radius: 4px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(201,168,76,0.3); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-mark">N</div>
+    <div>
+      <span class="logo-text">NAVIN</span>
+      <span class="logo-expansion"><span>N</span>eeds <span>A</span>nalysis &amp; <span>V</span>ertical <span>I</span>ntelligence <span>N</span>etwork</span>
+    </div>
+  </a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('chat')" id="tab-chat"><i class="ti ti-message-circle"></i> Report a Pain Point</button>
+    <button class="nav-tab" onclick="switchTab('dashboard')" id="tab-dashboard"><i class="ti ti-layout-dashboard"></i> Intelligence Dashboard</button>
+    <button class="nav-tab" onclick="switchTab('prd')" id="tab-prd"><i class="ti ti-file-description"></i> Generate PRD</button>
+  </div>
+</div>
+
+<!-- CHAT TAB -->
+<div class="section active" id="section-chat">
+  <div class="chat-intro">
+    <div class="chat-intro-eyebrow">NAVIN · Needs Analysis &amp; Vertical Intelligence Network</div>
+    <div class="chat-intro-title">What's slowing you down?</div>
+    <div class="chat-intro-abbr"><span>N</span>eeds &nbsp;·&nbsp; <span>A</span>nalysis &nbsp;·&nbsp; <span>V</span>ertical &nbsp;·&nbsp; <span>I</span>ntelligence &nbsp;·&nbsp; <span>N</span>etwork</div>
+    <div class="chat-intro-sub">Tell me about any frustration, delay, or repetitive task in your daily work. I'll ask a few questions to understand it fully — then the digital innovation team will review and find a solution.</div>
+    <div class="dept-selector">
+      <span style="font-size:11px;color:rgba(255,255,255,0.4);align-self:center;margin-right:4px;">Your dept:</span>
+      <div class="dept-chip" onclick="selectDept(this,'Billing')">Billing</div>
+      <div class="dept-chip" onclick="selectDept(this,'Sales')">Sales</div>
+      <div class="dept-chip" onclick="selectDept(this,'Radiology')">Radiology</div>
+      <div class="dept-chip" onclick="selectDept(this,'Insurance')">Insurance</div>
+      <div class="dept-chip" onclick="selectDept(this,'Clinical Ops')">Clinical Ops</div>
+      <div class="dept-chip" onclick="selectDept(this,'Finance')">Finance</div>
+      <div class="dept-chip" onclick="selectDept(this,'HR')">HR</div>
+      <div class="dept-chip" onclick="selectDept(this,'IT')">IT</div>
+      <div class="dept-chip" onclick="selectDept(this,'Other')">Other</div>
+    </div>
+  </div>
+  <div class="chat-window">
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg agent">
+        <div class="msg-avatar">N</div>
+        <div><div class="msg-bubble">Hello! I'm <strong>NAVIN</strong> — the hospital's <em>Needs Analysis &amp; Vertical Intelligence Network</em>. I'm here to listen and fully understand the challenges you face in your daily work.<br><br>Please select your department above, then tell me: <strong>what's the most frustrating or time-consuming part of your workday?</strong></div></div>
+      </div>
+    </div>
+    <div class="quick-replies" id="quickReplies">
+      <button class="qr-btn" onclick="useQuickReply(this)">Manual data entry</button>
+      <button class="qr-btn" onclick="useQuickReply(this)">Waiting on approvals</button>
+      <button class="qr-btn" onclick="useQuickReply(this)">Duplicate work across teams</button>
+      <button class="qr-btn" onclick="useQuickReply(this)">Can't find information quickly</button>
+    </div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chatInput" placeholder="Describe your pain point..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()"><i class="ti ti-send"></i></button>
+    </div>
+  </div>
+  <div class="submission-card" id="submissionCard">
+    <i class="ti ti-circle-check" style="font-size:24px;color:#1a7a4a;flex-shrink:0"></i>
+    <div>
+      <div style="font-size:14px;font-weight:600;color:#1a7a4a;margin-bottom:2px;">Pain point submitted successfully</div>
+      <div style="font-size:13px;color:#2d6a4f;">Your report has been logged into NAVIN and sent to the digital innovation team. You'll be notified when a solution is in progress.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD TAB -->
+<div class="section" id="section-dashboard">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">Vertical Intelligence Dashboard</div>
+      <div class="dash-sub">Live needs analysis — updated as submissions arrive across all verticals</div>
+    </div>
+    <button class="export-btn" onclick="openSheet()"><i class="ti ti-brand-google-drive"></i> Open Google Sheet</button>
+  </div>
+
+  <div class="sync-status" id="syncStatus">
+    <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
+    <span id="syncMsg">Paste your Google Apps Script URL in the sync settings below to enable live logging.</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Total submissions</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-delta" id="kpi-delta">Awaiting first report</div></div>
+    <div class="kpi-card"><div class="kpi-label">Verticals reached</div><div class="kpi-value" id="kpi-depts">0</div><div class="kpi-delta">Across all departments</div></div>
+    <div class="kpi-card"><div class="kpi-label">Top cluster</div><div class="kpi-value" style="font-size:18px;margin-top:4px;" id="kpi-top">—</div><div class="kpi-delta" id="kpi-top-count">No data yet</div></div>
+    <div class="kpi-card"><div class="kpi-label">High ROI opportunities</div><div class="kpi-value" id="kpi-roi">3</div><div class="kpi-delta">Ready to scope</div></div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-stack-2" style="font-size:15px"></i> Recurring clusters</div>
+      <div class="cluster-list" id="clusterList"><div style="font-size:13px;color:var(--text-muted);padding:1rem 0">No submissions yet — clusters will appear here as reports come in.</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-trophy" style="font-size:15px"></i> Top ROI opportunities</div>
+      <div class="roi-list" id="roiList"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:1.5rem;">
+    <div class="panel-title"><i class="ti ti-list-details" style="font-size:15px"></i> All submissions</div>
+    <div style="overflow-x:auto;">
+      <table class="submissions-table">
+        <thead><tr><th>Department</th><th>Pain Point</th><th>Category</th><th>Impact</th><th>Frequency</th><th>Date</th></tr></thead>
+        <tbody id="submissionsBody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;font-size:13px;">No submissions yet. Share NAVIN with your colleagues to start collecting pain points.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SYNC SETTINGS -->
+  <div class="panel" style="margin-bottom:1.5rem;background:var(--navy);border-color:var(--navy-light);">
+    <div class="panel-title" style="color:var(--gold)"><i class="ti ti-settings" style="font-size:15px"></i> Google Sheets live sync</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Paste your Google Apps Script Web App URL below. Every completed NAVIN conversation will append a new row to your Sheet automatically.</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:12px;">How to get this URL: Google Sheet → Extensions → Apps Script → Deploy → New deployment → Web app → Copy URL</div>
+    <div style="display:flex;gap:10px;">
+      <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/YOUR_ID/exec" style="flex:1;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:white;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+      <button onclick="saveScriptUrl()" style="padding:9px 16px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--radius-sm);font-weight:600;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Save</button>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:8px;">Also paste your Google Sheet URL here to enable the "Open Google Sheet" button:</div>
+    <div style="display:flex;gap:10px;margin-top:6px;">
+      <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit" style="flex:1;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:white;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
+      <button onclick="saveSheetUrl()" style="padding:9px 16px;background:rgba(255,255,255,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);font-weight:600;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRD TAB -->
+<div class="section" id="section-prd">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">Generate PRD</div>
+      <div class="dash-sub">Select a pain point cluster — NAVIN will generate a full product brief for your IT team</div>
+    </div>
+  </div>
+  <div class="prd-select-area">
+    <div class="prd-select-label">Select a cluster to generate a PRD for:</div>
+    <div class="prd-item-list" id="prdItemList">
+      <div style="font-size:13px;color:var(--text-muted);padding:1rem 0">Clusters will appear here once enough submissions have been collected.</div>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generatePRD()" disabled><i class="ti ti-wand"></i> Generate PRD with AI</button>
+  </div>
+  <div class="prd-output" id="prdOutput"></div>
+</div>
+
+<script>
+const ANTHROPIC_API = "https://api.anthropic.com/v1/messages";
+let selectedDept = "", conversationHistory = [], submissionComplete = false, selectedPRDItem = null;
+let allSubmissions = JSON.parse(localStorage.getItem('navin_submissions') || '[]');
+
+const roiItems = [
+  { rank:1, name:"Automated insurance pre-auth", score:"High ROI", cls:"roi-high" },
+  { rank:2, name:"Unified patient data layer", score:"High ROI", cls:"roi-high" },
+  { rank:3, name:"Claims feedback loop agent", score:"High ROI", cls:"roi-high" },
+  { rank:4, name:"Digital onboarding workflow", score:"Medium ROI", cls:"roi-mid" },
+  { rank:5, name:"Scheduling communication bot", score:"Medium ROI", cls:"roi-mid" },
+];
+
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+function selectDept(el, dept) {
+  document.querySelectorAll('.dept-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected'); selectedDept = dept;
+}
+function useQuickReply(btn) { document.getElementById('chatInput').value = btn.textContent; sendMessage(); }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+
+function appendMessage(role, text) {
+  const wrap = document.getElementById('chatMessages');
+  const div = document.createElement('div'); div.className = 'msg ' + role;
+  const avatar = role === 'agent' ? 'N' : (selectedDept ? selectedDept[0] : 'U');
+  div.innerHTML = `<div class="msg-avatar">${avatar}</div><div><div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div></div>`;
+  wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight;
+}
+function showTyping() {
+  const wrap = document.getElementById('chatMessages');
+  const div = document.createElement('div'); div.className = 'msg agent'; div.id = 'typing';
+  div.innerHTML = `<div class="msg-avatar">N</div><div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
+  wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight;
+}
+function removeTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || submissionComplete) return;
+  if (!selectedDept) { appendMessage('agent', "Please select your department first — tap one of the options above."); return; }
+  input.value = ''; input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('quickReplies').style.display = 'none';
+  appendMessage('user', text);
+  conversationHistory.push({ role:"user", content:text });
+  showTyping();
+
+  const systemPrompt = `You are NAVIN — the Needs Analysis & Vertical Intelligence Network — an AI agent for a hospital's digital innovation team. Your job is to have a short, empathetic conversation to fully understand an employee's operational pain point.
+
+The employee is from the ${selectedDept} department.
+
+Your goals:
+1. Understand the pain point clearly (what happens, how often, how many people affected)
+2. Identify root cause (manual process, missing system, communication gap, data issue)
+3. Estimate business impact (time wasted, errors caused, downstream effects)
+4. Ask ONLY the most important clarifying question at a time — max 4 questions total
+5. After gathering enough info (3-4 exchanges), produce a STRUCTURED SUMMARY
+
+When you have enough information, end with:
+---SUMMARY---
+PAIN POINT: [one sentence]
+DEPARTMENT: ${selectedDept}
+ROOT CAUSE: [Manual Process / Missing System / Communication Gap / Data Issue / Other]
+FREQUENCY: [Daily/Weekly/Monthly]
+PEOPLE AFFECTED: [number or estimate]
+IMPACT: [High/Medium/Low]
+AUTOMATION POTENTIAL: [High/Medium/Low]
+RECOMMENDED SOLUTION TYPE: [e.g. Automated workflow, Dashboard, AI agent, Integration, Digital form]
+---END---
+
+Before the summary, tell the user their submission has been logged into NAVIN.
+Keep responses warm, concise, and conversational. Never ask more than one question at a time.`;
+
+  try {
+    const res = await fetch(ANTHROPIC_API, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, system:systemPrompt, messages:conversationHistory })
+    });
+    const data = await res.json();
+    const reply = data.content.map(b => b.text||'').join('');
+    removeTyping();
+    conversationHistory.push({ role:'assistant', content:reply });
+    if (reply.includes('---SUMMARY---')) {
+      const parts = reply.split('---SUMMARY---');
+      if (parts[0].trim()) appendMessage('agent', parts[0].trim());
+      const summaryBlock = parts[1].split('---END---')[0].trim();
+      await logSubmission(summaryBlock, selectedDept);
+      submissionComplete = true;
+      document.getElementById('submissionCard').classList.add('visible');
+      input.placeholder = 'Submission complete — thank you!';
+    } else {
+      appendMessage('agent', reply);
+      document.getElementById('sendBtn').disabled = false;
+    }
+  } catch(e) {
+    removeTyping();
+    appendMessage('agent', 'Sorry, I had trouble connecting. Please try again in a moment.');
+    document.getElementById('sendBtn').disabled = false;
+  }
+}
+
+async function logSubmission(summary, dept) {
+  const lines = summary.split('\n');
+  const get = k => { const l = lines.find(l => l.startsWith(k)); return l ? l.split(':').slice(1).join(':').trim() : ''; };
+  const entry = {
+    timestamp: new Date().toISOString(),
+    department: dept,
+    painPoint: get('PAIN POINT'),
+    rootCause: get('ROOT CAUSE'),
+    frequency: get('FREQUENCY'),
+    peopleAffected: get('PEOPLE AFFECTED'),
+    impact: get('IMPACT'),
+    automationPotential: get('AUTOMATION POTENTIAL'),
+    recommendedSolution: get('RECOMMENDED SOLUTION TYPE'),
+    category: mapCategory(get('ROOT CAUSE')),
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  // Save to localStorage
+  allSubmissions.unshift(entry);
+  localStorage.setItem('navin_submissions', JSON.stringify(allSubmissions));
+
+  // Send to Google Sheets via Apps Script
+  const scriptUrl = localStorage.getItem('navin_script_url');
+  if (scriptUrl) {
+    try {
+      await fetch(scriptUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry)
+      });
+      updateSyncStatus(true);
+    } catch(e) {
+      console.warn('Sheets sync failed:', e);
+    }
+  }
+  renderDashboard();
+}
+
+function mapCategory(rc) {
+  if (!rc) return 'process'; const r = rc.toLowerCase();
+  if (r.includes('manual')) return 'manual'; if (r.includes('data')) return 'data';
+  if (r.includes('comm')) return 'comm'; if (r.includes('system')) return 'tech'; return 'process';
+}
+
+function updateSyncStatus(synced) {
+  const el = document.getElementById('syncStatus');
+  const msg = document.getElementById('syncMsg');
+  if (synced) {
+    el.className = 'sync-status sync-ok';
+    msg.textContent = 'Live sync active — all new submissions are appending to your Google Sheet automatically.';
+  }
+}
+
+function renderDashboard() {
+  const subs = allSubmissions;
+  document.getElementById('kpi-total').textContent = subs.length;
+  document.getElementById('kpi-depts').textContent = new Set(subs.map(s => s.department)).size;
+  if (subs.length > 0) document.getElementById('kpi-delta').textContent = '↑ ' + Math.min(subs.length, 3) + ' this week';
+
+  // Build clusters from actual data
+  const clusterMap = {};
+  subs.forEach(s => {
+    const cat = s.category || 'process';
+    const label = { manual:'Manual data re-entry', data:'Cross-system data duplication', comm:'Communication breakdowns', process:'Process gaps', tech:'Missing systems' }[cat] || 'Other';
+    if (!clusterMap[label]) clusterMap[label] = { name:label, count:0, depts:new Set(), automation: cat==='manual'||cat==='data'?'High':'Medium' };
+    clusterMap[label].count++;
+    clusterMap[label].depts.add(s.department);
+  });
+  const clusters = Object.values(clusterMap).sort((a,b) => b.count - a.count);
+  const maxCount = clusters[0]?.count || 1;
+
+  if (clusters.length > 0) {
+    document.getElementById('kpi-top').textContent = clusters[0].name.split(' ').slice(0,2).join(' ');
+    document.getElementById('kpi-top-count').textContent = clusters[0].count + ' overlapping reports';
+  }
+
+  const cl = document.getElementById('clusterList');
+  if (clusters.length === 0) {
+    cl.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:1rem 0">No submissions yet — clusters will appear here as reports come in.</div>';
+  } else {
+    cl.innerHTML = clusters.map(c => `<div class="cluster-item" onclick="switchTab('prd')">
+      <div class="cluster-item-top"><span class="cluster-name">${c.name}</span><span class="cluster-count">${c.count} report${c.count!==1?'s':''}</span></div>
+      <div class="cluster-bar-wrap"><div class="cluster-bar" style="width:${Math.round(c.count/maxCount*100)}%"></div></div>
+      <div class="cluster-meta">${[...c.depts].join(', ')} · Automation potential: ${c.automation}</div>
+    </div>`).join('');
+  }
+
+  const rl = document.getElementById('roiList');
+  rl.innerHTML = roiItems.map(r => `<div class="roi-item"><div class="roi-rank">${r.rank}</div><div class="roi-name">${r.name}</div><span class="roi-score ${r.cls}">${r.score}</span></div>`).join('');
+
+  const tbody = document.getElementById('submissionsBody');
+  if (subs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;font-size:13px;">No submissions yet. Share NAVIN with your colleagues to start collecting pain points.</td></tr>';
+  } else {
+    tbody.innerHTML = subs.map(s => {
+      const catClass = {manual:'tag-manual',data:'tag-data',comm:'tag-comm',process:'tag-process',tech:'tag-tech'}[s.category]||'tag-process';
+      const catLabel = {manual:'Manual process',data:'Data issue',comm:'Communication',process:'Process gap',tech:'Missing system'}[s.category]||'Process';
+      const impClass = {high:'impact-high',medium:'impact-mid',low:'impact-low'}[(s.impact||'').toLowerCase()]||'impact-low';
+      const impLabel = s.impact || '—';
+      return `<tr><td><strong>${s.department}</strong></td><td style="max-width:220px;font-size:12px;color:var(--text-secondary)">${s.painPoint||'—'}</td><td><span class="tag ${catClass}">${catLabel}</span></td><td><span class="impact-dot ${impClass}"></span>${impLabel}</td><td>${s.frequency||'—'}</td><td style="color:var(--text-muted)">${s.date||'—'}</td></tr>`;
+    }).join('');
+  }
+
+  // PRD list from clusters
+  const prdList = document.getElementById('prdItemList');
+  if (clusters.length === 0) {
+    prdList.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:1rem 0">Clusters will appear here once submissions come in.</div>';
+    document.getElementById('genBtn').disabled = true;
+  } else {
+    prdList.innerHTML = clusters.map((c,i) => `<div class="prd-item" onclick="selectPRD(this,${i})" data-cluster="${i}">
+      <div><div class="prd-item-name">${c.name}</div><div class="prd-item-dept">${c.count} report${c.count!==1?'s':''} · ${[...c.depts].join(', ')}</div></div>
+      <i class="ti ti-chevron-right" style="color:var(--text-muted)"></i>
+    </div>`).join('');
+    window._clusters = clusters;
+  }
+}
+
+function selectPRD(el, idx) {
+  document.querySelectorAll('.prd-item').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPRDItem = window._clusters ? window._clusters[idx] : null;
+  document.getElementById('genBtn').disabled = !selectedPRDItem;
+}
+
+async function generatePRD() {
+  if (!selectedPRDItem) return;
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div>&nbsp; Generating…';
+  document.getElementById('prdOutput').classList.remove('visible');
+
+  const relevant = allSubmissions.filter(s => [...selectedPRDItem.depts].includes(s.department)).slice(0,5).map(s=>`- ${s.department}: ${s.painPoint}`).join('\n') || '- No specific reports yet for this cluster';
+
+  const prompt = `You are a senior product manager at a hospital digital innovation team. Generate a concise PRD for addressing this pain point cluster identified by NAVIN (Needs Analysis & Vertical Intelligence Network).
+
+CLUSTER: ${selectedPRDItem.name}
+AFFECTED DEPARTMENTS: ${[...selectedPRDItem.depts].join(', ')}
+RELATED REPORTS:
+${relevant}
+
+Generate a PRD with these sections:
+1. Problem Statement (2-3 sentences)
+2. User Stories (3 bullet points, "As a [role], I want to...")
+3. Proposed Solution (2-3 sentences describing the MVP approach)
+4. MVP Scope (4-5 bullet points of features)
+5. Out of Scope (2-3 items)
+6. Estimated Implementation Complexity (Low/Medium/High with a 1-sentence justification)
+7. Suggested Tech Stack (brief)
+8. Success Metrics (3 measurable KPIs)
+
+Keep each section concise and practical.`;
+
+  try {
+    const res = await fetch(ANTHROPIC_API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1200, messages:[{role:'user',content:prompt}] }) });
+    const data = await res.json();
+    renderPRD(data.content.map(b=>b.text||'').join(''), selectedPRDItem);
+  } catch(e) {
+    document.getElementById('prdOutput').innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted)">Failed to generate. Please try again.</div>';
+    document.getElementById('prdOutput').classList.add('visible');
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-wand"></i> Generate PRD with AI';
+}
+
+function renderPRD(text, cluster) {
+  const out = document.getElementById('prdOutput');
+  const sections = text.split('\n').filter(l=>l.trim());
+  let html = `<h2>${cluster.name}</h2><div class="meta"><span><i class="ti ti-building" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>${[...cluster.depts].join(', ')}</span><span><i class="ti ti-clock" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>Generated ${new Date().toLocaleDateString()}</span><span><i class="ti ti-users" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>${cluster.count} report${cluster.count!==1?'s':''}</span></div>`;
+  let inList = false, inBody = false;
+  sections.forEach(line => {
+    if (line.match(/^\d+\.|^#{1,3}/)) {
+      if (inList) { html += '</ul>'; inList = false; } if (inBody) { html += '</div>'; inBody = false; }
+      html += `<div class="prd-section-title">${line.replace(/^\d+\.\s*/,'').replace(/^#+\s*/,'').replace(/\*\*/g,'')}</div><div class="prd-body">`;
+      inBody = true;
+    } else if (line.startsWith('- ')||line.startsWith('• ')) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${line.slice(2).replace(/\*\*/g,'')}</li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      html += `<p style="margin-bottom:6px">${line.replace(/\*\*/g,'')}</p>`;
+    }
+  });
+  if (inList) html += '</ul>'; if (inBody) html += '</div>';
+  html += `<div class="prd-actions"><button class="action-btn action-primary" onclick="copyPRD()"><i class="ti ti-copy"></i> Copy PRD</button><button class="action-btn action-secondary" onclick="switchTab('dashboard')"><i class="ti ti-arrow-left"></i> Back to dashboard</button></div>`;
+  out.innerHTML = html; out.classList.add('visible');
+  out.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function copyPRD() {
+  navigator.clipboard.writeText(document.getElementById('prdOutput').innerText).catch(()=>{});
+  const btn = event.target.closest('button');
+  btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+  setTimeout(()=>{ btn.innerHTML = '<i class="ti ti-copy"></i> Copy PRD'; }, 2000);
+}
+
+function saveScriptUrl() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (url) {
+    localStorage.setItem('navin_script_url', url);
+    updateSyncStatus(true);
+    alert('Google Apps Script URL saved! All future submissions will sync to your Sheet automatically.');
+  }
+}
+function saveSheetUrl() {
+  const url = document.getElementById('sheetUrl').value.trim();
+  if (url) { localStorage.setItem('navin_sheet_url', url); alert('Sheet URL saved!'); }
+}
+function openSheet() {
+  const url = localStorage.getItem('navin_sheet_url');
+  if (url) { window.open(url, '_blank'); }
+  else { switchTab('dashboard'); setTimeout(()=>{ alert('Please save your Google Sheet URL in the sync settings below first.'); }, 300); }
+}
+
+// Init
+const savedScript = localStorage.getItem('navin_script_url');
+const savedSheet = localStorage.getItem('navin_sheet_url');
+if (savedScript) { document.getElementById('scriptUrl').value = savedScript; updateSyncStatus(true); }
+if (savedSheet) document.getElementById('sheetUrl').value = savedSheet;
+renderDashboard();
+</script>
+</body>
+</html>
+HTMLEOF
+echo "Done"
+Output
+
+Done
